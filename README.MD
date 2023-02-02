@@ -50,7 +50,7 @@ O projeto ainda está em desenvolvimento e as próximas atualizações serão vo
 - [x] Criar página para registro de contatos
 - [x] Criar página para atualização de contatos
 - [x] Criar modal de exclusão de contato
-- [ ] conectar Front-end com Backend
+- [x] Conectar Front-end com Backend
 
 ## :rocket: Como executar o projeto
 
