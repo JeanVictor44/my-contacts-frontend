@@ -4,15 +4,19 @@ import { Input } from "../Input";
 import { Select } from "../Select";
 import * as S from "./style";
 import PropTypes from "prop-types";
-import { useState } from "react";
-import { useRef } from "react";
+import { useEffect, useState } from "react";
 import { isEmailValid } from "../../utils/isEmailValid";
 import { isPhoneValid } from "../../utils/isPhoneValid";
+import { MycontactsApi } from "../../api";
+import { useNavigate,useLocation} from "react-router-dom";
 
 // Controlled components   -> React é responsável por gerenciar os campos do form -> formulários pequenos e simples
 // Uncontrolled components -> A resonsabilidade é da dom
 
 export const ContactForm = ({ buttonLabel }) => {
+    const navigate = useNavigate()
+    const location = useLocation()
+
     //Quando usamos estados para controlar os valores do form -> Controlled components
     // A única fonte de verdade é o useState -> One-way data binding
     //Two way data binding -> Vue e Angular -> DOM sincronizado com o estado
@@ -22,15 +26,46 @@ export const ContactForm = ({ buttonLabel }) => {
     const [category, setCategory] = useState("");
     const [errors, setErrors] = useState([]);
 
-    function handleSubmit(event) {
-        event.preventDefault();
+    const [categories, setCategories]= useState([])
 
-        console.log({
-            name,
-            email,
-            phone,
-            category,
-        });
+    useEffect(() => {
+        (async() => {
+            const categories = await MycontactsApi.get('/categories');
+            setCategories(categories.data)
+        })()
+    }, [])
+
+
+    function findCategoryId(){
+        const categorySelected = categories.find((actualCategory) => actualCategory.name == category)
+        if(categorySelected){
+            return categorySelected.id
+        }else {
+            throw new Error('Category not Exists ou wasn\'t selected ')
+        }
+    }
+
+
+    async function handleSubmit(event) {
+        event.preventDefault();
+        try {
+            const contactData =  {
+                name,
+                email,
+                phone,
+                category_id: findCategoryId(),
+            }
+            if(location.pathname === '/new'){
+                await MycontactsApi.post('/contacts',contactData)
+            }else{
+                const contactId = location.pathname.split('/')[2]
+                await MycontactsApi.put(`/contacts/${contactId}`, contactData)
+            }
+            navigate('/')
+        }catch(error) {
+            console.log(error)
+        }
+
     }
 
     function handleNameChange(event) {
@@ -102,7 +137,7 @@ export const ContactForm = ({ buttonLabel }) => {
         return errors.find((error) => error.field === fieldName)?.message
     }
 
-    console.log(errors);
+
     return (
         <S.Form onSubmit={handleSubmit}>
             {/*
@@ -158,13 +193,16 @@ export const ContactForm = ({ buttonLabel }) => {
                 <Select
                     value={category}
                     onChange={(event) => setCategory(event.target.value)}
+
                 >
-                    <option value="" selected hidden="hidden">
+                    <option value="" defaultValue hidden="hidden">
                         Categoria
                     </option>
-                    <option>Linkedin</option>
-                    <option>Instagram</option>
-                    <option>Facebook</option>
+                    {
+                        categories?.map((category) => (
+                            <option key={category.id}>{category.name}</option>
+                        ))
+                    }
                 </Select>
             </FormGroup>
 

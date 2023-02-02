@@ -8,12 +8,21 @@ import { Modal } from "../../components/Modal";
 import { Link } from "react-router-dom";
 import { useMemo } from "react";
 import { Loader } from "../../components/Loader";
+import { MycontactsApi } from "../../api";
 
 export const Home = () => {
     const [contacts, setContacts] = useState([]);
     const [contactRemove, setContactRemove] = useState({});
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [inputSearch, setInputSearch] = useState("");
+
+    useEffect(() => {
+        (async() => {
+            const request = await MycontactsApi.get('/contacts')
+            setContacts(request.data)
+        })()
+
+    }, []);
 
     const openModal = (contact) => {
         setModalIsOpen(true);
@@ -24,45 +33,21 @@ export const Home = () => {
         setModalIsOpen(false);
     };
 
-    const deleteContact = () => {
+    const deleteContact = async () => {
+        await MycontactsApi.delete(`/contacts/${contactRemove.id}`);
         setContacts((contacts) =>
             contacts.filter((contact) => contact.id != contactRemove.id)
         );
         closeModal();
     };
 
-    useEffect(() => {
-        setContacts([
-            {
-                id: 1,
-                nome: "Jean Victor",
-                tel: 71987557670,
-                social_media: "Instagram",
-                email: "jeanvictormachado3@gmail.com",
-            },
-            {
-                id: 2,
-                nome: "Emanuelle",
-                tel: 71985644672,
-                social_media: "Linkedin",
-                email: "emanuellesantos@gmail.com",
-            },
-            {
-                id: 3,
-                nome: "Ramon",
-                tel: 71988576258,
-                social_media: "Whatsapp",
-                email: "ramonsilva@gmail.com",
-            },
-        ]);
-    }, []);
+
 
     const lowerSearch = inputSearch.toLowerCase()
 
 
     const contactsFiltered = useMemo(() => {
-        return contacts
-        .filter(contact => contact.nome.toLowerCase().includes(lowerSearch))
+        return contacts?.filter(contact => contact?.name.toLowerCase().includes(lowerSearch))
 
     },[inputSearch, contacts])
 
@@ -100,15 +85,16 @@ export const Home = () => {
                     <S.Card
                         initial={{ opacity: 0, x: -400 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.04 * contact.id }}
+                        transition={{ delay: 0.04  }}
+                        key={contact.id}
                     >
                         <div className="info">
                             <div className="contact-name">
-                                <strong>{contact.nome}</strong>
-                                <small>{contact.social_media}</small>
+                                <strong>{contact.name}</strong>
+                                <small>{contact.category_name}</small>
                             </div>
                             <span>{contact.email}</span>
-                            <span>{formatTel(contact.tel.toString())}</span>
+                            <span>{formatTel(contact.phone)}</span>
                         </div>
 
                         <div className="actions">
