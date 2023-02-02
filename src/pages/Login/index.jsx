@@ -11,7 +11,7 @@ export const Login = () => {
             <S.Presentation>
                 <img src={logoLogin} />
                 <h1>Organize sua vida</h1>
-                <h3>Organize seus contatos</h3>
+                <h2>Organize seus contatos</h2>
                 <img src={womanLogin} />
             </S.Presentation>
 

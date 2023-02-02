@@ -27,7 +27,7 @@ export const Presentation = styled.div `
         margin: 0 auto;
         letter-spacing: 1.5px;
     }
-    h3 {
+    h2 {
         margin-top:98px;
         font-size:24px;
         color: #fff;
